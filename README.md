@@ -2,13 +2,11 @@
 
 Учебный DevOps-проект: REST API для управления задачами.
 
-Цель проекта — на практике пройти путь от простого приложения с базой данных до контейнеризации, CI/CD и развёртывания в Kubernetes.
+## Стек
 
-## Текущий стек
-
-- Python 3
+- Python
 - FastAPI
-- PostgreSQL 16
+- PostgreSQL
 - SQLAlchemy
 - Docker и Docker Compose
 - Git и GitHub
@@ -16,95 +14,101 @@
 ## Архитектура
 
 ```text
-Клиент
-  ↓ HTTP
-FastAPI
-  ↓ SQL
-PostgreSQL
-FastAPI и PostgreSQL работают в отдельных Docker-контейнерах. Данные базы хранятся в Docker volume, поэтому сохраняются между перезапусками контейнеров.
-Возможности API
-Проверка состояния сервиса.
-Получение списка задач.
-Создание новой задачи.
-Хранение задач и пользователей в PostgreSQL.
-Структура проекта
+Клиент → FastAPI → PostgreSQL
+```
+
+API и PostgreSQL работают в отдельных Docker-контейнерах. Данные базы сохраняются в Docker volume между перезапусками.
+
+## Структура проекта
+
+```text
 taskflow/
 ├── app/
-│   └── main.py              # FastAPI-приложение
+│   └── main.py
 ├── db/
-│   └── 001_init.sql         # Первая SQL-миграция
-├── Dockerfile               # Образ API
-├── docker-compose.yml       # Локальный запуск API и PostgreSQL
-├── requirements.txt         # Python-зависимости
+│   └── 001_init.sql
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
 └── README.md
-Быстрый запуск
+```
+
+## Запуск
+
 Нужен установленный Docker Desktop.
-Запустить API и PostgreSQL:
+
+```bash
 docker compose up --build -d
+```
+
 Проверить контейнеры:
+
+```bash
 docker compose ps
+```
+
 Остановить сервисы:
+
+```bash
 docker compose down
-Инициализация новой базы
-При первом запуске на новом компьютере нужно применить SQL-миграцию:
+```
+
+## Инициализация базы данных
+
+При первом запуске на новой машине примени миграцию:
+
+```bash
 docker compose exec -T db psql -U taskflow -d taskflow < db/001_init.sql
-Проверка API
-Проверка состояния:
+```
+
+## Проверка API
+
+```bash
 curl http://127.0.0.1:8000/health
-Ожидаемый ответ:
-{
-  "status": "ok"
-}
-Получить список задач:
 curl http://127.0.0.1:8000/tasks
-Swagger-документация FastAPI:
-http://127.0.0.1:8000/docs
-API-методы
-Метод	Путь	Назначение
-GET	/health	Проверка работоспособности API
-GET	/tasks	Получение списка задач
-POST	/tasks	Создание задачи
+```
 
+Swagger-документация: `http://127.0.0.1:8000/docs`
 
-Пример создания задачи:
+## API
+
+| Метод | Путь | Назначение |
+|---|---|---|
+| `GET` | `/health` | Проверка работоспособности API |
+| `GET` | `/tasks` | Получение списка задач |
+| `POST` | `/tasks` | Создание задачи |
+
+Пример запроса для создания задачи:
+
+```json
 {
   "user_id": 1,
   "title": "Настроить GitHub Actions",
   "status": "todo",
   "priority": 2
 }
-SQL-практика
-В проекте используются:
-таблицы users и tasks;
-внешний ключ tasks.user_id → users.id;
-JOIN для получения задач вместе с email пользователя;
-индекс idx_tasks_user_status по user_id и status;
-ограничения статуса и приоритета задач;
-SQL-миграция для создания схемы.
-Дальнейший план
+```
 
-Создать FastAPI и PostgreSQL.
+## SQL-практика
 
-Написать SQL-миграцию.
+- Таблицы `users` и `tasks`.
+- Внешний ключ между задачей и пользователем.
+- `JOIN` для получения задач с email пользователя.
+- Индекс по `user_id` и `status`.
+- Ограничения на статус и приоритет.
+- SQL-миграция для создания схемы базы.
 
-Добавить Docker Compose.
+## План развития
 
-Собрать API в Docker-образ.
-
-Опубликовать код на GitHub.
-
-Добавить автоматическое применение миграций.
-
-Написать тесты API.
-
-Настроить GitHub Actions: тесты и сборка образа.
-
-Опубликовать Docker-образ в GitHub Container Registry.
-
-Развернуть сервис в Kubernetes.
-
-Упаковать Kubernetes-манифесты в Helm chart.
-
-Автоматизировать подготовку VM через Ansible.
-
-Добавить мониторинг с Prometheus и Grafana.
+- [x] FastAPI и PostgreSQL
+- [x] SQL-миграция
+- [x] Docker Compose
+- [x] Docker-образ API
+- [x] GitHub-репозиторий
+- [ ] Автоматические миграции
+- [ ] Тесты API
+- [ ] GitHub Actions
+- [ ] Публикация Docker-образа
+- [ ] Kubernetes и Helm
+- [ ] Ansible для подготовки VM
+- [ ] Prometheus и Grafana
